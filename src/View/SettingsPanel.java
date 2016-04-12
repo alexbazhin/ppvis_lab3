@@ -37,7 +37,7 @@ public class SettingsPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 PaintGraph pg = new PaintGraph();
 
-                pg.setParam(getTextFieldA(), getTextFieldB(), getTextFieldXFrom(), getTextFieldXBefore());
+                //pg.setParam(getTextFieldA(), getTextFieldB(), getTextFieldXFrom(), getTextFieldXBefore());
             }
         });
 

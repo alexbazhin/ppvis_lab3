@@ -14,9 +14,9 @@ public class PaintGraph extends JPanel {
     private int xln;
     private int l2;
 
-    private int a=1;
-    private int b=2;
-    private int minValue=1;
+    private int a=5;
+    private int b=10;
+    private int minValue=0;
     private int maxValue=2;
     double prevX;
     double prevY;
@@ -138,8 +138,8 @@ public class PaintGraph extends JPanel {
     public synchronized void addAndDraw(double x, double y, Graphics g) {
         Object[] row = {x, y};
         tableModel.addRow(row);
-        g.drawLine(350 + (int) (prevX * 1), 250 - (int) (100 * scaleFactorY),
-                350 + (int)(x * 1), 250 - (int)(y * 100));
+        g.drawLine(350 + (int) (prevX * 100), 250 - (int) (100 * prevY),
+                350 + (int)(x * 100), 250 - (int)(y * 100));
         prevX = x;
         prevY = y;
     }
@@ -158,7 +158,5 @@ public class PaintGraph extends JPanel {
                 g.drawLine(initialIndentationX, initialIndentationY, initialIndentationX+(int)tableModel.getValueAt(i, j), initialIndentationY+(int)tableModel.getValueAt(i+1, j+1));
             }
         }
-
-
     }
 }
