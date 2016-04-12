@@ -1,14 +1,36 @@
-package DrawGraph;
+package Controller;
 
 import java.awt.*;
 import javax.swing.*;
-import java.lang.*;
+import javax.swing.table.DefaultTableModel;
 
 public class PaintGraph extends JPanel {
-    private int valueOfDivision, nx, initialIndentationY, oyk, oyx, initialIndentationX, oxk, oxy, axisLengthY, axisLengthX, sw, xln, l2;
-    private float xng, scaleFactorX, scaleFactorY, tABStep, yg, xk;
+    private int valueOfDivision;
+    private int initialIndentationY;
+    private int initialIndentationX;
+    private int axisLengthY;
+    private int axisLengthX;
+    private int sw;
+    private int xln;
+    private int l2;
 
-    public PaintGraph() {
+    private int a=1;
+    private int b=2;
+    private int minValue=1;
+    private int maxValue=2;
+    double prevX;
+    double prevY;
+
+    private float scaleFactorX;
+    private float scaleFactorY;
+    private float tABStep;
+    private float yg;
+    private float xk;
+    DefaultTableModel tableModel;
+
+    public PaintGraph() {}
+
+    public PaintGraph(DefaultTableModel tableModel) {
         valueOfDivision = 10;// цена деления  по шкалам
         scaleFactorY = (float) 0.5; // коэф шкалы по у
         scaleFactorX = (float) 0.5; // коэф шкалы по x
@@ -19,9 +41,11 @@ public class PaintGraph extends JPanel {
         // по умолчанию в начале на экран выводится график y=x
         sw = 1; // свич для переключения графика функции
         tABStep = (float) 0.011;//шаг табуляции
+        this.tableModel=tableModel;
     }
 
     public void paint(Graphics g) {
+
         super.paint(g);
         //Разбиваем каждую ось на две части для удобства переноса центра координат
         // Ось Y
@@ -77,116 +101,64 @@ public class PaintGraph extends JPanel {
                     l1 + valueOfDivision + initialIndentationX, (int) (axisLengthY * scaleFactorY + 2 + initialIndentationY));
             l1 = l1 + valueOfDivision;
         }
+        ThreadGroup group = new ThreadGroup("A");
+        Function fun = new Function();
 
-        funcLine(g);
+        for(double x = minValue; x <= maxValue; x += 0.1) {
+            if(x == minValue) {
+                prevX = x;
 
-    }
+                prevY = fun.getY(x, a, b);
+            }
 
-    // группа методов рисующих графики функций
-    // Метод рисующий линию
-
-    void funcLine(Graphics g) {
-        xln = (axisLengthX - l2);
-        xk = 0;
-        yg = 0;
-        while ((xk + tABStep) * valueOfDivision < xln && (xk + tABStep) * valueOfDivision < axisLengthY - axisLengthY * scaleFactorY) {
-            yg = xk;
-            g.drawLine((int) (xln - xk * valueOfDivision + initialIndentationX),
-                    (int) (axisLengthY * scaleFactorY + yg * valueOfDivision + initialIndentationY),
-                    (int) (xln - (xk + tABStep) * valueOfDivision + initialIndentationX),
-                    (int) (axisLengthY * scaleFactorY + (xk + tABStep) * valueOfDivision) + initialIndentationY);
-            xk = xk + tABStep;
+            final double finalX = x;
+            final double finalX1 = x;
+            Thread thread = new Thread(group, new Runnable() {
+                @Override
+                public void run() {
+                    addAndDraw(finalX, fun.getY(finalX1, a, b), g);
+                }
+            });
+            thread.run();
         }
-        xk = 0;
-        yg = 0;
-        while ((xk + tABStep) * valueOfDivision < l2 && (xk + tABStep) * valueOfDivision < axisLengthY * scaleFactorY) {
-            yg = xk;
-            g.drawLine((int) (xln + xk * valueOfDivision + initialIndentationX),
-                    (int) (axisLengthY * scaleFactorY - yg * valueOfDivision + initialIndentationY),
-                    (int) (xln + (xk + tABStep) * valueOfDivision + initialIndentationX),
-                    (int) (axisLengthY * scaleFactorY - (xk + tABStep) * valueOfDivision) + initialIndentationY);
-            xk = xk + tABStep;
+
+       // inscriptions(1, g);
+        //funDraw(g);
+
+    }
+
+    private void inscriptions(int x, Graphics g) {
+        int c=10;
+        for (int i=0; i<x; i+=0.4) {
+            g.drawString(i+"", (int) (axisLengthX * scaleFactorX + initialIndentationX) + c, (int) (axisLengthY * scaleFactorY + initialIndentationY) + 10);
+            c+=10;
         }
     }
 
-    // группа getXXX(), setXXX() - методов
-    public int getNx() {
-        return nx;
+    public synchronized void addAndDraw(double x, double y, Graphics g) {
+        Object[] row = {x, y};
+        tableModel.addRow(row);
+        g.drawLine(350 + (int) (prevX * 1), 250 - (int) (100 * scaleFactorY),
+                350 + (int)(x * 1), 250 - (int)(y * 100));
+        prevX = x;
+        prevY = y;
     }
 
-    public void setNx(int nx) {
-        this.nx = nx;
+    public void setParam(int a, int b, int minValue, int maxValue) {
+        this.a = a;
+        this.b = b;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
     }
 
-    public int getValueOfDivision() {
-        return valueOfDivision;
-    }
+    public void funDraw(Graphics g) {
+        for (int i=0; i<tableModel.getRowCount()-1; i++)
+        {
+            for (int j=0; j<tableModel.getColumnCount()-1; j++) {
+                g.drawLine(initialIndentationX, initialIndentationY, initialIndentationX+(int)tableModel.getValueAt(i, j), initialIndentationY+(int)tableModel.getValueAt(i+1, j+1));
+            }
+        }
 
-    public void setValueOfDivision(int valueOfDivision) {
-        this.valueOfDivision = valueOfDivision;
-    }
 
-    public float getScaleFactorY() {
-        return scaleFactorY;
-    }
-
-    public void setScaleFactorY(float scaleFactorY) {
-        this.scaleFactorY = scaleFactorY;
-    }
-
-    public float getScaleFactorX() {
-        return scaleFactorX;
-    }
-
-    public void setScaleFactorX(float scaleFactorX) {
-        this.scaleFactorX = scaleFactorX;
-    }
-
-    public float gettABStep() {
-        return tABStep;
-    }
-
-    public void settABStep(float tABStep) {
-        this.tABStep = tABStep;
-    }
-
-    public int getAxisLengthX() {
-        return axisLengthX;
-    }
-
-    public void setAxisLengthX(int axisLengthX) {
-        this.axisLengthX = axisLengthX;
-    }
-
-    public int getAxisLengthY() {
-        return axisLengthY;
-    }
-
-    public void setAxisLengthY(int axisLengthY) {
-        this.axisLengthY = axisLengthY;
-    }
-
-    public int getSw() {
-        return sw;
-    }
-
-    public void setSw(int sw) {
-        this.sw = sw;
-    }
-
-    public int getInitialIndentationY() {
-        return initialIndentationY;
-    }
-
-    public void setInitialIndentationY(int initialIndentationY) {
-        this.initialIndentationY = initialIndentationY;
-    }
-
-    public int getInitialIndentationX() {
-        return initialIndentationX;
-    }
-
-    public void setInitialIndentationX(int initialIndentationX) {
-        this.initialIndentationX = initialIndentationX;
     }
 }

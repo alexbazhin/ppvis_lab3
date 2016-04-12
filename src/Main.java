@@ -1,4 +1,4 @@
-package DrawGraph;
+import View.MainPanel;
 
 import javax.swing.*;
 

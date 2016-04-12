@@ -1,12 +1,20 @@
-package DrawGraph;
+package View;
+
+import Controller.PaintGraph;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 public class MainPanel {
     PaintGraph pg; // класс вывода графика функции
     SettingsPanel rp; // класс задания функции
     JTable tableOfValues;
+    String[] columnNames = {
+            "X",
+            "Y"
+    };
+    private DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
     public MainPanel() {
         super();
@@ -17,17 +25,14 @@ public class MainPanel {
         Container c = frame.getContentPane();
         c.setLayout(new BorderLayout()); // установка менеджера размещения
 
-        String[] columnNames = {
-                "X",
-                "Y"
-        };
+
         String[][] data = new String[3][2];
 
-        tableOfValues = new JTable(data, columnNames);
+        tableOfValues = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(tableOfValues);
         scrollPane.setSize(10, 50);
 
-        pg = new PaintGraph(); // инициализация класса построения графика функции
+        pg = new PaintGraph(tableModel); // инициализация класса построения графика функции
         JScrollPane scrollPane2 = new JScrollPane(pg);
         pg.setSize(600, 430); // задание размеров
         c.add(scrollPane2, BorderLayout.CENTER); // задание размещения
