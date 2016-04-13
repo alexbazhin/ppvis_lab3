@@ -35,9 +35,8 @@ public class SettingsPanel extends JPanel {
         buildGraphButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                PaintGraph pg = new PaintGraph();
-
-                //pg.setParam(getTextFieldA(), getTextFieldB(), getTextFieldXFrom(), getTextFieldXBefore());
+                pg.setParam(getTextFieldA(), getTextFieldB(), getTextFieldXFrom(), getTextFieldXBefore());
+                pg.repaint();
             }
         });
 
