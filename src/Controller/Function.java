@@ -7,7 +7,7 @@ public class Function {
 
     private final static double EPSILON = 0.0001;
 
-    public double getY(double x, int a, int b) {
+    public double getY(double x, double a, double b) {
         double result = 0;
         double y;
         for(int i = 1; ; ++i) {

@@ -13,11 +13,11 @@ public class SettingsPanel extends JPanel {
     private JLabel labelA, labelB, labelX, labelXFrom, labelXBefore;
     public JButton buildGraphButton;
 
-    PaintGraph pg;
+    PaintGraph paintGraph;
 
     public SettingsPanel(PaintGraph p) {
         setLayout(new FlowLayout());
-        pg = p;
+        paintGraph = p;
 
         textFieldA = new JTextField(10);
         textFieldB = new JTextField(10);
@@ -35,8 +35,10 @@ public class SettingsPanel extends JPanel {
         buildGraphButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                pg.setParam(getTextFieldA(), getTextFieldB(), getTextFieldXFrom(), getTextFieldXBefore());
-                pg.repaint();
+
+                paintGraph.setParam(getTextFieldA(), getTextFieldB(), getTextFieldXFrom(), getTextFieldXBefore());
+                paintGraph.calculate();
+                paintGraph.repaint();
             }
         });
 
@@ -52,19 +54,19 @@ public class SettingsPanel extends JPanel {
         add(buildGraphButton);
     }
 
-    public int getTextFieldA() {
-        return Integer.parseInt(textFieldA.getText());
+    public double getTextFieldA() {
+        return Double.parseDouble(textFieldA.getText());
     }
 
-    public int getTextFieldB() {
-        return Integer.parseInt(textFieldB.getText());
+    public double getTextFieldB() {
+        return Double.parseDouble(textFieldB.getText());
     }
 
-    public int getTextFieldXFrom() {
-        return Integer.parseInt(textFieldXFrom.getText());
+    public double getTextFieldXFrom() {
+        return Double.parseDouble(textFieldXFrom.getText());
     }
 
-    public int getTextFieldXBefore() {
-        return Integer.parseInt(textFieldXBefore.getText());
+    public double getTextFieldXBefore() {
+        return Double.parseDouble(textFieldXBefore.getText());
     }
 }

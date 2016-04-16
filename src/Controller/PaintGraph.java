@@ -5,121 +5,119 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class PaintGraph extends JPanel {
-    private int valueOfDivision;
-    private int initialIndentationY;
-    private int initialIndentationX;
-    private int axisLengthY;
-    private int axisLengthX;
-    private int temp2;
-
-    private int a=0;
-    private int b=0;
-    private int minValue=0;
-    private int maxValue=0;
-    double prevX;
-    double prevY;
-
-    private float scaleFactorX;
-    private float scaleFactorY;
-    private float tABStep;
-
     DefaultTableModel tableModel;
+    JTable table;
 
-    public PaintGraph() {}
+    private int canvasSizeX = 630;
+    private int canvasSizeY = 455;
 
-    public PaintGraph(DefaultTableModel tableModel, int a, int b, int min, int max) {
-        valueOfDivision = 10;
-        scaleFactorY = (float) 0.5;
-        scaleFactorX = (float) 0.5;
-        initialIndentationY = 50;
-        initialIndentationX = 50;
-        axisLengthY = 400;
-        axisLengthX = 600;
+    private double a = 0;
+    private double b = 0;
+    private double maxValueAxis = 4;
+    private double minValueAxis = -4;
+    private double maxValue = 1;
+    private double minValue = -1;
 
+    private final static double H = 0.1;
+    private final static double minY = -4;
+    private final static double maxY = 4;
 
-        tABStep = (float) 0.011;
-        this.tableModel=tableModel;
-        this.a=a;
-        this.b=b;
-        minValue=min;
-        maxValue=max;
+    int centerX;
+    int centerY;
+
+    double coeffX;
+    double coeffY;
+    double x;
+    double prevX, prevY;
+
+    public PaintGraph() {
+        super(true);
+
+        setSize(new Dimension(canvasSizeX, canvasSizeY));
+        setPreferredSize(new Dimension(canvasSizeX, canvasSizeY));
+        addMouseWheelListener(e -> {
+            if (e.isControlDown()) {
+                if (canvasSizeX > 200 & canvasSizeY > 200 && e.getWheelRotation() < 0) {
+                    canvasSizeX /= 1.2;
+                    canvasSizeY /= 1.2;
+                } else if (canvasSizeX < 10000 && canvasSizeY < 10000 && e.getWheelRotation() > 0) {
+                    canvasSizeX *= 1.2;
+                    canvasSizeY *= 1.2;
+                }
+
+                setPreferredSize(new Dimension(canvasSizeX, canvasSizeY));
+                setSize(canvasSizeX, canvasSizeY);
+
+                repaint();
+            }
+        });
+    }
+    public void setTable(DefaultTableModel tableModel, JTable table) {
+        this.tableModel = tableModel;
+        this.table = table;
     }
 
-    public void paint(Graphics g) {
+    public void setParam(double a, double b, double minValue, double maxValue) {
+        this.a = a;
+        this.b = b;
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+    }
 
-        super.paint(g);
-        while (tableModel.getRowCount()>0) {
-            tableModel.removeRow(0);
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setColor(Color.BLACK);
+
+        drawAxis(g2);
+
+        for(int i = 0; i < tableModel.getRowCount() - 1; ++i) {
+            int x1 = (int) ((double) tableModel.getValueAt(i, 0) * coeffX);
+            int y1 = (int) ((double) tableModel.getValueAt(i, 1) * coeffY);
+            int x2 = (int) ((double) tableModel.getValueAt(i + 1, 0) * coeffX);
+            int y2 = (int) ((double) tableModel.getValueAt(i + 1, 1) * coeffY);
+
+            g2.drawLine(centerX + x1, centerY - y1, centerX + x2, centerY - y2);
         }
+    }
 
-        g.drawLine((int) (axisLengthX * scaleFactorX + initialIndentationX), initialIndentationY,
-                (int) (axisLengthX * scaleFactorX + initialIndentationX), axisLengthY + initialIndentationY);
-
-        g.drawLine((int) (axisLengthX * scaleFactorX + initialIndentationX), initialIndentationY,
-                (int) (axisLengthX * scaleFactorX + initialIndentationX) - 3, initialIndentationY + 10);
-        g.drawLine((int) (axisLengthX * scaleFactorX + initialIndentationX), initialIndentationY,
-                (int) (axisLengthX * scaleFactorX + initialIndentationX) + 3, initialIndentationY + 10);
-
-        g.drawString("Y", (int) (axisLengthX * scaleFactorX + initialIndentationX) - 10, initialIndentationY + 10);
-        g.drawString("0", (int) (axisLengthX * scaleFactorX + initialIndentationX) - 10, (int) (axisLengthY * scaleFactorY + initialIndentationY) + 10);
-
-        int temp1 = (int) (axisLengthY * scaleFactorY);
-        temp2 = axisLengthY - temp1;
-        int kof1 = (int) temp1 / valueOfDivision;
-        int kof2 = (int) temp2 / valueOfDivision;
-        for (int i = 1; i < kof1 + 1; i++) {
-            g.drawLine((int) (axisLengthX * scaleFactorX - 2 + initialIndentationX), temp1 - valueOfDivision + initialIndentationY,
-                    (int) (axisLengthX * scaleFactorX + 2 + initialIndentationX), temp1 - valueOfDivision + initialIndentationY);
-            temp1 = temp1 - valueOfDivision;
-        }
-        temp1 = axisLengthY - temp2;
-        for (int i = 1; i < kof2 + 1; i++) {
-            g.drawLine((int) (axisLengthX * scaleFactorX - 2 + initialIndentationX), temp1 + valueOfDivision + initialIndentationY,
-                    (int) (axisLengthX * scaleFactorX + 2 + initialIndentationX), temp1 + valueOfDivision + initialIndentationY);
-            temp1 = temp1 + valueOfDivision;
-        }
-
-        g.drawLine(initialIndentationX, (int) (axisLengthY * scaleFactorY + initialIndentationY), axisLengthX + initialIndentationX, (int) (axisLengthY * scaleFactorY + initialIndentationY));
-        g.drawLine(axisLengthX + initialIndentationX, (int) (axisLengthY * scaleFactorY + initialIndentationY), axisLengthX + initialIndentationX - 10,
-                (int) (axisLengthY * scaleFactorY + initialIndentationY) - 3);
-        g.drawLine(axisLengthX + initialIndentationX, (int) (axisLengthY * scaleFactorY + initialIndentationY), axisLengthX + initialIndentationX - 10,
-                (int) (axisLengthY * scaleFactorY + initialIndentationY) + 3);
-
-        g.drawString("Х", axisLengthX + initialIndentationY - 10, (int) (axisLengthY * scaleFactorY + initialIndentationY) - 10);
-
-        temp1 = (int) (axisLengthX * scaleFactorX);
-        temp2 = axisLengthX - temp1;
-        kof1 = (int) temp1 / valueOfDivision;
-        kof2 = (int) temp2 / valueOfDivision;
-        for (int i = 1; i < kof1 + 1; i++) {
-            g.drawLine(temp1 - valueOfDivision + initialIndentationX, (int) (axisLengthY * scaleFactorY - 2 + initialIndentationY),
-                    temp1 - valueOfDivision + initialIndentationX, (int) (axisLengthY * scaleFactorY + 2 + initialIndentationY));
-            temp1 = temp1 - valueOfDivision;
-        }
-        temp1 = axisLengthX - temp2;
-        double xl = temp1 / valueOfDivision;
-        double xl1 = temp2 / valueOfDivision;
-        for (int i = 1; i < kof2 + 1; i++) {
-            g.drawLine(temp1 + valueOfDivision + initialIndentationX, (int) (axisLengthY * scaleFactorY - 2 + initialIndentationY),
-                    temp1 + valueOfDivision + initialIndentationX, (int) (axisLengthY * scaleFactorY + 2 + initialIndentationY));
-            temp1 = temp1 + valueOfDivision;
+    public void calculate() {
+        if (tableModel.getRowCount() > 0) {
+            for (int i = tableModel.getRowCount() - 1; i > -1; i--) {
+                tableModel.removeRow(i);
+            }
         }
 
         ThreadGroup group = new ThreadGroup("A");
+
+        Graphics2D g = (Graphics2D) getGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.clearRect(0, 0, canvasSizeX, canvasSizeY);
+
+        g.setColor(Color.BLACK);
+        drawAxis(g);
+
         Function fun = new Function();
 
-        for(double x = minValue; x <= maxValue; x += 0.1) {
+        for(x = minValue; x <= maxValue; x += H) {
             if(x == minValue) {
                 prevX = x;
                 prevY = fun.getY(x, a, b);
             }
 
-            final double finalX = x;
-            final double finalX1 = x;
             Thread thread = new Thread(group, new Runnable() {
                 @Override
                 public void run() {
-                    addAndDraw(finalX, fun.getY(finalX1, a, b), g);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    addAndDraw(x, fun.getY(x, a, b), g);
+                    Object[] row = {x, fun.getY(x, a, b)};
+                    tableModel.addRow(row);
                 }
             });
             thread.run();
@@ -127,32 +125,44 @@ public class PaintGraph extends JPanel {
 
     }
 
-    private void inscriptions(int x, Graphics g) {
-        int c=10;
-        for (int i=0; i<x; i+=0.4) {
-            g.drawString(i+"", (int) (axisLengthX * scaleFactorX + initialIndentationX) + c, (int) (axisLengthY * scaleFactorY + initialIndentationY) + 10);
-            c+=10;
+    public void drawAxis(Graphics g) {
+        coeffX = getWidth() / (maxValueAxis - minValueAxis);
+        coeffY = getHeight() / (maxY - minY);
+
+        if(Math.signum(minValueAxis) == Math.signum(maxValueAxis)) {
+            g.drawLine(5, 0, 5, getHeight());
+            centerX =  - (int) (minValueAxis * coeffX);
+        } else {
+            g.drawLine((int) (Math.abs(minValueAxis) * getWidth() / (maxValueAxis - minValueAxis)), 0,
+                    (int) (Math.abs(minValueAxis) * getWidth() / (maxValueAxis - minValueAxis)), getHeight());
+            centerX = (int) (coeffX * Math.abs(minValueAxis));
+        }
+
+        if(Math.signum(minY) == Math.signum(maxY)) {
+            centerY = getHeight() - 5;
+            g.drawLine(0, centerY, getWidth(), centerY);
+        } else {
+            g.drawLine(0, (int) (maxY * getHeight() / (maxY - minY)),
+                    getWidth(), (int) (maxY * getHeight() / (maxY - minY)));
+
+            centerY = (int) (coeffY * maxY);
+        }
+
+        for(int i = 0; i <= 10; ++i) {
+            double x = minValueAxis + i * getWidth() / 10 / coeffX;
+            double y = minY + i * getHeight() / 10 / coeffY;
+
+            g.drawString(String.format("%.2f", x), i * getWidth() / 10, centerY);
+            g.drawLine(i * getWidth() / 10, centerY-5, i * getWidth() / 10, centerY+5);
+            g.drawString(String.format("%.2f", y), centerX, getHeight() - i * getHeight() / 10);
+            g.drawLine(centerX-5, getHeight() - i * getHeight() / 10, centerX+5, getHeight() - i * getHeight() / 10);
         }
     }
 
     public synchronized void addAndDraw(double x, double y, Graphics g) {
-        Object[] row = {x, y};
-        tableModel.addRow(row);
-        g.drawLine(350 + (int) (prevX * 100), 250 - (int) (100 * prevY),
-                350 + (int)(x * 100), 250 - (int)(y * 100));
+        g.drawLine(centerX + (int) (prevX * coeffX), centerY - (int) (prevY * coeffY),
+                centerX + (int)(x * coeffX), centerY - (int)(y * coeffY));
         prevX = x;
         prevY = y;
     }
-
-    public void setParam(int a, int b, int minValue, int maxValue) {
-        while (tableModel.getRowCount()>0) {
-            tableModel.removeRow(0);
-        }
-        this.a = a;
-        this.b = b;
-        this.minValue = minValue;
-        this.maxValue = maxValue;
-    }
-
-
 }
